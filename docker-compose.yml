@@ -1,0 +1,49 @@
+version: "3"
+services:
+  nodeapp:
+    container_name: node_backend
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    ports:
+      - "3001:3001"
+    links:
+      - mongodb
+    depends_on:
+      - mongodb
+    environment:
+      WAIT_HOSTS: mongodb:27017
+    networks:
+      - first-network
+
+  mongodb:
+    container_name: mongodb
+    image: mongo:6.0
+    volumes:
+      - ./data/db:/data/db
+      - ./seed_data:/docker-entrypoint-initdb.d
+    ports:
+      - "27018:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+      - MONGO_INITDB_DATABASE=admin
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    networks:
+      - second-network
+
+
+networks:
+  first-network:
+    driver: bridge
+  second-network:
+    driver: bridge
+
+# definirali smo networke samo da pokazemo da iako su oba servisa u razlicitim mrezama,
+# da mogu komunicirati jedno s drugim. U mongodb /etc/hosts se nalazi docker.host.internal kao known host 
+# sto mu govori da od tamo moze doci komunikacija
+# Although not in a bridge network, the containers can now communicate 
+# like they are using the docker0 interface as a bridge to discover each other.

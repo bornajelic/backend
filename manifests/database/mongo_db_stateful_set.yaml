@@ -1,0 +1,60 @@
+#we need to create this first because we will use a service name "mongo-db-service" when we create StatefulSet
+apiVersion: v1  
+kind: Service
+metadata:
+  name: mongo-db-service
+  labels:
+    app: mongo-db
+spec:
+  ports:
+  - port: 27017
+  clusterIP: None
+  selector:
+    app: mongo-db
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo-db-ss
+spec:
+  serviceName: mongo-db-service
+  replicas: 2 # by default is 1
+  selector:
+    matchLabels:
+      app: mongo-db # has to match .spec.template.metadata.labels
+  template:
+    metadata:
+      labels:
+        app: mongo-db # has to match .spec.selector.matchLabels
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:latest
+        ports:
+        - containerPort: 27017
+          name: mongo-port
+        volumeMounts:
+        - name: mongo-data
+          mountPath: /data/db # tu mongo ocekuje pohranu podataka
+        - name: mongo-db-scripts
+          mountPath: ./docker-entrypoint-initdb.d
+        envFrom:
+          - secretRef:
+              name: mongo-db-credentials
+      volumes:
+        - name: mongo-db-scripts
+          configMap:
+            name: mongo-config-map
+            items:
+            - key: init_mongo.js
+              path: init_mongo.js
+        
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: local-path # s a k3d specific dynamically provisioned Claim. So we don't need to create PersistentVolume. 
+      resources:
+        requests:
+          storage: 1Gi
