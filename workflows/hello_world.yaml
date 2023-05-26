@@ -1,0 +1,28 @@
+name: Hello world workflow
+
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch: # zelis imati gumb na UI na githubu
+
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        #whenever you call a community actions, you basically
+        #clone the repository, adn it will use that source code
+        # to preform an action
+      - name: hello world
+        run: echo "hello world"
+        shell: bash
+  goodbye:
+    runs-on: ubuntu-latest
+    steps:
+      - name: goodbye world
+        run: echo "goodbye world"
+        shell: bash
