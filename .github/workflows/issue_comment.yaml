@@ -29,23 +29,17 @@ jobs:
               reactions: '+1'
     
     comment-with-api:
-      permissions: write-all
       runs-on: ubuntu-latest
       steps:
-        - name: Create comment with GithubAPI
-        # we dont need to write curl, github has its own api
-          run: | 
+        - name: Create comment with API
+          run: |
             gh api -X POST \
-              http://api.github.com/repo/$(ORGANIZATION)/$(REPOSITORY)/issues/$(ISSUE_NUMBER)/comments \
-              -f body= '
-              Comment from API call not actions
+              https://api.github.com/repos/${ORGANIZATION}/${REPOSITORY}/issues/${ISSUE_NUMBER}/comments \
+              -f body='
+              Comment but from the API call not action
               '
           env:
-          # potrebna env varijabla za api call-ove
-          # samo je dostupan for duration of a workflow run
-          # za novi workflow se promijeni
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            ORGANIZATION: ${{ secrets.event.organization.login }}
+            ORGANIZATION: ${{ github.event.repository.owner.login }}
             REPOSITORY: ${{ github.event.repository.name }}
             ISSUE_NUMBER: ${{ github.event.issue.number }}
-
