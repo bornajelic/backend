@@ -6,6 +6,8 @@ on:
 
 jobs:
     comment-with-action:
+    # action fetcha automatski env varijable, pa zato ih
+    # ne trebamo tu definirati
         permissions: write-all
         runs-on: ubuntu-latest
         steps:
@@ -25,3 +27,25 @@ jobs:
 
                 [1]: https://github.com/peter-evans/create-or-update-comment
               reactions: '+1'
+    
+    comment-with-api:
+      permissions: write-all
+      runs-on: ubuntu-latest
+      steps:
+        - name: Create comment with GithubAPI
+        # we dont need to write curl, github has its own api
+          run: | 
+            gh api -X POST \
+              http://api.github.com/repo/$(ORGANIZATION)/$(REPOSITORY)/issues/$(ISSUE_NUMBER)/comments \
+              -f body= '
+              Comment from API call not actions
+              '
+          env:
+          # potrebna env varijabla za api call-ove
+          # samo je dostupan for duration of a workflow run
+          # za novi workflow se promijeni
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            ORGANIZATION: ${{ secrets.event.organization.login }}
+            REPOSITORY: ${{ github.event.repository.name }}
+            ISSUE_NUMBER: ${{ github.event.issue.number }}
+
