@@ -8,11 +8,11 @@ jobs:
     comment-with-action:
         runs-on: ubuntu-latest
         steps:
-        #usin community aciton to create a comment on this
-        # particular issue
+        # znaci neka koristimo community action koji ce sam
+        # generirati neki dummy komentar
           - name: "dump github context"
             run: echo '${{ toJSON(github.event) }}' | jq
-          #   shell: bash
+            shell: bash
           # - name: Create comment
           #   uses: peter-evans/create-or-update-comment@v3
           #   with:
